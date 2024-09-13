@@ -1,6 +1,6 @@
 from openai import OpenAI
 from dotenv import load_dotenv
-from helper_functions import get_existing_assistant_id, save_assistant_id
+from helper_functions import get_existing_assistant_id, save_assistant_id,instructions, assistant_id_file
 import os
 import time
 
@@ -10,9 +10,6 @@ load_dotenv()
 # OpenAI API initialization
 api_key = os.getenv("OPENAI")  # Ensure your API key is set correctly
 client = OpenAI(api_key=api_key)
-
-# Path to store assistant ID
-assistant_id_file = 'assistant_id.txt'
 
 # Function to initialize the assistant (create or retrieve existing)
 def initialize_assistant():
@@ -24,14 +21,14 @@ def initialize_assistant():
     else:
         # Create a new assistant if one doesn't exist
         assistant = client.beta.assistants.create(
-            instructions="Ciao sono Gaja. Come posso aiutarti?",
+            instructions=instructions,
             name="Gaja",
-            tools=[{"type": "code_interpreter"}],
+            # tools=[{"type": "code_interpreter"}],
             model="gpt-4o",
         )
         # Save the new assistant ID for future use
         save_assistant_id(assistant_id_file, assistant.id)
-        print("🚀 ~ Assistant ID saved:", assistant.id)
+        # print("🚀 ~ Assistant ID saved:", assistant.id)
         return assistant
 
 # Function to create a new thread and send the user's query
@@ -51,7 +48,8 @@ def create_thread_and_send_query(assistant, query):
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant.id,
-            instructions="Presentati."
+            instructions=instructions,
+            max_completion_tokens=150
         )
 
         return thread, run
@@ -63,15 +61,17 @@ def create_thread_and_send_query(assistant, query):
 def retrieve_and_format_messages(thread, run):
     try:
         while True:
-            time.sleep(1)
+            time.sleep(5)
             run_status = client.beta.threads.runs.retrieve(
                 thread_id=thread.id,
                 run_id=run.id
             )
-
             # If the run is complete, retrieve the messages
             if run_status.status == 'completed':
-                messages = client.beta.threads.messages.list(thread_id=thread.id)
+                messages = client.beta.threads.messages.list(
+                    thread_id=thread.id,
+                    run_id=run.id
+                )
                 formatted_messages = []
                 user_message = None
                 # Process and format the conversation messages
@@ -99,6 +99,7 @@ def handle_query(query):
 
     # Create a thread and send the user's query
     thread, run = create_thread_and_send_query(assistant, query)
+    # print("\n\n🚀 ~ run:", run)
 
     # Retrieve and format the messages from the assistant
     return retrieve_and_format_messages(thread, run)

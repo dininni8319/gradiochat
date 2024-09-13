@@ -1,5 +1,6 @@
 import gradio as gr
 from main import handle_query
+
 # Gradio interface setup
 def create_gradio_interface():
     with gr.Blocks(fill_height=True) as demo:
@@ -17,7 +18,6 @@ def create_gradio_interface():
         with gr.Row():
             submit = gr.Button("Invia")
             clear = gr.ClearButton([chatbot, chat_input])
-
         # Bind buttons to functions
         submit.click(handle_query, [chat_input], chatbot)
         chat_input.submit(handle_query, [chat_input], chatbot)
