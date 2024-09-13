@@ -35,8 +35,8 @@ def call_openai(message):
         if response.status_code == 200:
             print("Response from OpenAI:", response.json())
             print('\n')
-            print(response.json()['choices'][0]['message']['content'])
-            return response.json()['choices'][0]['message']['content']
+            print(response.json()['choices'][0]['message'])
+            return response.json()['choices'][0]['message']
         else:
             print("Error:", response.status_code, response.text)
     
