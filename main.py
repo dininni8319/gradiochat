@@ -99,7 +99,6 @@ def handle_query(query):
 
     # Create a thread and send the user's query
     thread, run = create_thread_and_send_query(assistant, query)
-    # print("\n\n🚀 ~ run:", run)
 
     # Retrieve and format the messages from the assistant
     return retrieve_and_format_messages(thread, run)
