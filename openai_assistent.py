@@ -4,7 +4,7 @@ from requests_made import check_and_update_requests
 from helper_functions import get_existing_assistant_id, save_assistant_id, instructions, assistant_id_file
 import os
 import time
-
+import anyio
 # Load environment variables
 load_dotenv()
 
@@ -24,7 +24,7 @@ def initialize_assistant():
         assistant = client.beta.assistants.create(
             instructions=instructions,
             name="Gaja",
-            # tools=[{"type": "code_interpreter"}],
+            tools=[{"type", "file_search"}],
             model="gpt-4o",
         )
         # Save the new assistant ID for future use
@@ -37,9 +37,7 @@ def create_thread_and_send_query(assistant, query):
     try:
         # Create a new conversation thread
         thread = client.beta.threads.create()
-     
-        # if user_id:
-        #     check_and_update_requests(user_id)
+    
         # Add user message to the thread
         client.beta.threads.messages.create(
             thread_id=thread.id,
@@ -64,7 +62,7 @@ def create_thread_and_send_query(assistant, query):
 def retrieve_and_format_messages(thread, run):
     try:
         while True:
-            time.sleep(5)
+            time.sleep(2)
             run_status = client.beta.threads.runs.retrieve(
                 thread_id=thread.id,
                 run_id=run.id
