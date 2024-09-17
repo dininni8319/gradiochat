@@ -1,6 +1,7 @@
 from openai import OpenAI
 from dotenv import load_dotenv
-from helper_functions import get_existing_assistant_id, save_assistant_id,instructions, assistant_id_file
+from requests_made import check_and_update_requests
+from helper_functions import get_existing_assistant_id, save_assistant_id, instructions, assistant_id_file
 import os
 import time
 
@@ -36,14 +37,16 @@ def create_thread_and_send_query(assistant, query):
     try:
         # Create a new conversation thread
         thread = client.beta.threads.create()
-
+     
+        # if user_id:
+        #     check_and_update_requests(user_id)
         # Add user message to the thread
         client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
             content=query
         )
-
+         
         # Run the assistant on the thread
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -91,14 +94,3 @@ def retrieve_and_format_messages(thread, run):
 
     except Exception as e:
         return [("Error", f"An error occurred: {e}")]
-
-# Main function to handle the user query
-def handle_query(query):
-    # Initialize the assistant
-    assistant = initialize_assistant()
-
-    # Create a thread and send the user's query
-    thread, run = create_thread_and_send_query(assistant, query)
-
-    # Retrieve and format the messages from the assistant
-    return retrieve_and_format_messages(thread, run)

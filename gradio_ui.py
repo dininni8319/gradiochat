@@ -1,27 +1,32 @@
 import multiprocessing
 import gradio as gr
-from main import handle_query
-from flask import Flask, request, jsonify
-from flask_cors import CORS, cross_origin
+from main import  initialize_assistant, create_thread_and_send_query, retrieve_and_format_messages
+from flask_app import run_flask
+from helper_functions import read_data_from_file
+from requests_made import check_and_update_requests
 
-app = Flask(__name__)
-CORS(app, resources={r"/token": {"origins": "*"}})
+# Main function to handle the user query
+def handle_query(query):
+    # Read data from a plain text file
+    data = read_data_from_file()
+   
+    if not query:
+        return [("Error", "Input non valido!")]
+    
+    if not data['user_id']or not data['token']:
+        return [("Error", "User ID or Token is missing")]
 
-token = None  # Store token globally
+    # checks if you are over the limit
+    if not check_and_update_requests(data['user_id']):
+        return [("Error", "Mi dispiace ma hai raggiunto il numbero massimo di richieste per questo periodo")]
 
-# Route to receive token
-@cross_origin(origin='*')
-@app.route('/token', methods=['POST'])
-def receive_token():
-    global token
-    data = request.get_json()
-    token = data.get('token')
-    print(f"Received token: {token}")
-    return jsonify({'status': 'Token received'})
+    # Initialize the assistant
+    assistant = initialize_assistant()
 
-# Function to run Flask
-def run_flask():
-    app.run(host='0.0.0.0', port=7861, threaded=True)  # Disable reloader and run Flask without debug mode
+    # Create a thread and send the user's query
+    thread, run = create_thread_and_send_query(assistant, query)
+    # Retrieve and format the messages from the assistant
+    return retrieve_and_format_messages(thread, run)
 
 # Gradio interface setup
 def create_gradio_interface():
@@ -46,7 +51,7 @@ def create_gradio_interface():
         with gr.Row():
             submit = gr.Button("Invia")
             clear = gr.ClearButton([chatbot, chat_input])
-
+        
         # Bind buttons to functions
         submit.click(handle_query, [chat_input], chatbot)
         chat_input.submit(handle_query, [chat_input], chatbot)
@@ -56,12 +61,13 @@ def create_gradio_interface():
 # Function to run Gradio
 def run_gradio():
     demo = create_gradio_interface()
-    demo.launch(share=False, server_port=7860)  # Run Gradio on port 7860
+    demo.launch(share=False, server_port=7860)
 
 if __name__ == "__main__":
-    # Run Flask in a separate process
+    # Start Flask in a separate process
     flask_process = multiprocessing.Process(target=run_flask)
     flask_process.start()
-
-    # Run Gradio in the main process
+      # Send the query and check the request tracking
+    # Ensure the token and user_id are valid before running Gradio
     run_gradio()
+   

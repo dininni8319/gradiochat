@@ -16,3 +16,24 @@ def save_assistant_id(file_path, assistant_id):
     with open(file_path, 'w') as file:
         file.write(assistant_id)
 
+def read_data_from_file(filename = "data.txt"):
+    """
+    Reads key-value pairs from a file and returns them as a dictionary.
+
+    :param filename: The name of the file to read from.
+    :return: A dictionary containing the key-value pairs.
+    """
+    data = {}
+    try:
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+            for line in lines:
+                key, value = line.strip().split('=')
+                data[key] = value
+    except FileNotFoundError:
+        print(f"File {filename} not found.")
+    except ValueError:
+        print(f"Invalid format in {filename}. Each line should be key=value.")
+    
+    return data
+
