@@ -3,8 +3,55 @@ from psycopg2 import sql
 from decouple import config
 from datetime import datetime, timedelta
 from helper_functions import read_data_from_file
+import psycopg2
 
 MAX_REQUESTS = 50  # Set max requests to 50
+
+def add_chat_conversation(user_id, query, response):
+    """Add a new chat conversation to the database."""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # Insert the conversation into the database
+        cursor.execute(sql.SQL("""
+            INSERT INTO chatbot_chatconversation (user_id, query, response, created_at)
+            VALUES (%s, %s, %s, %s);
+        """), (user_id, query, response, datetime.now()))
+
+        # Commit the transaction
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+        print("Chat added successfully.")
+        
+    except psycopg2.DatabaseError as e:
+        print(f"Database error: {e}")
+        
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+def get_chat_conversations(user_id):
+    """Retrieve all chat conversations for a specific user."""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Select all conversations for the user
+    cursor.execute(sql.SQL("""
+        SELECT query, created_at, response
+        FROM chatbot_chatconversation
+        WHERE user_id = %s
+        ORDER BY created_at DESC;
+    """), (user_id,))
+
+    conversations = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    # Return the list of conversations as tuples (query, response, created_at)
+    return conversations
 
 def get_tracking_period(start_date):
     """Calculate the tracking period based on the start date."""
