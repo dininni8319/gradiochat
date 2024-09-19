@@ -1,16 +1,36 @@
 import multiprocessing
 import gradio as gr
+import pandas as pd
 from openai_assistent import initialize_assistant, create_thread_and_send_query, retrieve_and_format_messages
 from flask_app import run_flask
-from helper_functions import read_data_from_file
+from helper_functions import read_data_from_file, process_data
 from requests_made import check_and_update_requests, add_chat_conversation, get_chat_conversations
 
 def display_past_conversations(user_id):
-    conversations = get_chat_conversations(user_id)
+    conversations = process_data(get_chat_conversations(user_id))
     if not conversations:
         return []
     # Convert to a format suitable for gr.Dataframe (list of dicts or tuples)
     return conversations
+
+# Function to process the uploaded file and send content to OpenAI
+def process_file(file):
+    if file.name.endswith('.csv'):
+        df = pd.read_csv(file.name)
+    elif file.name.endswith('.xlsx'):
+        df = pd.read_excel(file.name)
+    else:
+        return ["Unsupported file format"]
+    
+    file_content = df.to_string()
+
+    # Send the file content to the assistant
+    assistant = initialize_assistant()
+    thread, run = create_thread_and_send_query(assistant, file_content)
+    formatted_messages = retrieve_and_format_messages(thread, run)
+    print("🚀 ~ formatted_messages:", formatted_messages)
+
+    return formatted_messages
 
 # Main function to handle the user query
 def handle_query(query, history):
@@ -83,9 +103,15 @@ def create_gradio_interface():
         # Bind buttons to functions (updating the history)
         submit.click(handle_query, [chat_input, chatbot], chatbot)
         chat_input.submit(handle_query, [chat_input, chatbot], chatbot)
+        
+        # File upload input for CSV/Excel files
+        file_upload = gr.File(label="Upload CSV or Excel", file_types=["csv", "xlsx"])
 
+        # Bind file upload to process_file function
+        file_upload.change(process_file, file_upload, chatbot)
+        
         conversations_df = gr.Dataframe(
-            headers=[ "Query", "Created At", "Response"],
+            headers=[ "Richiesta", "Data", "Risposta"],
             type="pandas",  # Use "pandas" if you want DataFrame-like output
             value=conversations
         )

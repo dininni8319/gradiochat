@@ -1,10 +1,10 @@
+import os
+import time
 from openai import OpenAI
 from dotenv import load_dotenv
 from helper_functions import get_existing_assistant_id, save_assistant_id, instructions, assistant_id_file
-import os
-import time
-# Load environment variables
-load_dotenv()
+
+load_dotenv() # Load env file
 
 # OpenAI API initialization
 api_key = os.getenv("OPENAI")  # Ensure your API key is set correctly
@@ -30,19 +30,27 @@ def initialize_assistant():
         # print("🚀 ~ Assistant ID saved:", assistant.id)
         return assistant
 
-# Function to create a new thread and send the user's query
-def create_thread_and_send_query(assistant, query):
+# Function to create a new thread and send the user's query or file content
+def create_thread_and_send_query(assistant, file_content=None, query=None):
     try:
         # Create a new conversation thread
         thread = client.beta.threads.create()
-    
-        # Add user message to the thread
-        client.beta.threads.messages.create(
-            thread_id=thread.id,
-            role="user",
-            content=query
-        )
-         
+
+        if file_content:
+            # Add file content to the thread
+            client.beta.threads.messages.create(
+                thread_id=thread.id,
+                role="user",
+                content=file_content
+            )
+        elif query:
+            # Add user query to the thread
+            client.beta.threads.messages.create(
+                thread_id=thread.id,
+                role="user",
+                content=query
+            )
+
         # Run the assistant on the thread
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -54,6 +62,7 @@ def create_thread_and_send_query(assistant, query):
 
     except Exception as e:
         return [("Error", f"An error occurred: {e}")]
+
 
 # Function to retrieve and format the assistant's response
 def retrieve_and_format_messages(thread, run):
