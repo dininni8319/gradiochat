@@ -2,7 +2,7 @@ import os
 import time
 from openai import OpenAI
 from dotenv import load_dotenv
-from helper_functions import get_existing_assistant_id, save_assistant_id, instructions, assistant_id_file
+from helper_functions import get_value_from_file, read_data_from_file,  save_assistant_id, instructions, assistant_id_file
 
 load_dotenv() # Load env file
 
@@ -12,7 +12,9 @@ client = OpenAI(api_key=api_key)
 
 # Function to initialize the assistant (create or retrieve existing)
 def initialize_assistant():
-    existing_assistant_id = get_existing_assistant_id(assistant_id_file)
+    user_data = read_data_from_file()
+    existing_assistant_id = get_value_from_file(user_data["assistant"])
+    print("🚀 ~ existing_assistant_id:", existing_assistant_id)
 
     if existing_assistant_id:
         # Retrieve existing assistant
@@ -26,30 +28,64 @@ def initialize_assistant():
             model="gpt-4o-mini",
         )
         # Save the new assistant ID for future use
-        save_assistant_id(assistant_id_file, assistant.id)
-        # print("🚀 ~ Assistant ID saved:", assistant.id)
+        # save_assistant_id(assistant_id_file, assistant.id)
         return assistant
 
-# Function to create a new thread and send the user's query or file content
-def create_thread_and_send_query(assistant, file_content=None, query=None):
+# Function to create a new thread and send the user's query and the file content
+def create_thread_send_file_and_query(assistant, query, file_path):
     try:
         # Create a new conversation thread
         thread = client.beta.threads.create()
+        print("🚀 ~ thread:", thread)
+      
+        # Step 1: Upload a File with an "assistants" purpose
+        my_file = client.files.create(
+            file=open(file_path, "rb"),
+            purpose='assistants'
+        )
 
-        if file_content:
-            # Add file content to the thread
-            client.beta.threads.messages.create(
-                thread_id=thread.id,
-                role="user",
-                content=file_content
-            )
-        elif query:
-            # Add user query to the thread
-            client.beta.threads.messages.create(
-                thread_id=thread.id,
-                role="user",
-                content=query
-            )
+        print(f"This is the file object: {my_file} \n")
+
+        # Add file content to the thread
+        my_thread_message = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=query or "Quale è il contenuto del file!",
+            attachments=[{
+                "file_id": my_file.id,
+                "tools": [{"type": "code_interpreter"}]
+            }]
+        )
+
+        print(f"This is my thread object: {my_thread_message} \n")
+
+    
+        # Run the assistant on the thread
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id,
+            instructions=instructions,
+        )
+
+        print(f"This is the run object: {run} \n")
+
+        return thread, run
+
+    except Exception as e:
+        return [("Error", f"An error occurred: {e}")]
+
+# Function to create a new thread and send the user's query
+def create_thread_and_send_query(assistant, query):
+    try:
+        # Create a new conversation thread
+        thread = client.beta.threads.create()
+       
+        # Add user query to the thread
+        client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=query
+        )
 
         # Run the assistant on the thread
         run = client.beta.threads.runs.create(

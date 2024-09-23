@@ -1,22 +1,29 @@
-import os
 import re
 from datetime import datetime
-import pandas as pd
 
-instructions = "Devi rispondere solo in Italiano. Se ti scrivo in altre lingue digli che non puoi scrivere in altre lingue. Inoltre devi rispondere a domande che sono relative alla finanza. Tipo borsa, azioni e politica aziendale. Se qualcuno ti chiede come ti chiami gli rispondi che mi chiamo Gaia. Non rispondere a domande che non sono relative all'argomento."
+instructions = ""
 # Path to store assistant ID
 assistant_id_file = 'assistant_id.txt'
 
 # Function to check if the assistant already exists and return its ID
-def get_existing_assistant_id(file_path):
-  if os.path.exists(file_path):
-    with open(file_path, 'r') as file:
-        assistant_id = file.read().strip()
-        return assistant_id
-  return None
+def get_value_from_file(target_key, filename = "assistant_id.txt"):
+    try:
+        # Open and read the file
+        with open(filename, 'r') as file:
+            for line in file:
+                # Strip any extra whitespace and split the line by '='
+                key, value = line.strip().split('=', 1)
+                # Check if the key matches the target_key
+                if key == target_key:
+                    return value
+        return None  # Key not found
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
 # Function to save the assistant ID to a file
 def save_assistant_id(file_path, assistant_id):
+    data = read_data_from_file()
     with open(file_path, 'w') as file:
         file.write(assistant_id)
 

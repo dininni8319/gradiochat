@@ -12,11 +12,13 @@ def receive_token():
     data = request.get_json()
     token = data.get('token')
     user_id = data.get('user_id')
+    assistant = data.get('assistant')
 
     # Write data to a plain text file
     with open("data.txt", 'w') as file:
         file.write(f"user_id={user_id}\n")
         file.write(f"token={token}\n")
+        file.write(f"assistant={assistant}\n")
 
     if not token or not user_id or not is_token_valid(user_id, token):
         return redirect(url_for('login'))  # Use `url_for` for better URL management
