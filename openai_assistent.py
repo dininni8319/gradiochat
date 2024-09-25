@@ -2,7 +2,7 @@ import os
 import time
 from openai import OpenAI
 from dotenv import load_dotenv
-from helper_functions import get_value_from_file, read_data_from_file,  save_assistant_id, instructions, assistant_id_file
+from helper_functions import get_value_from_file, read_data_from_file, instructions, assistant_id_file
 
 load_dotenv() # Load env file
 

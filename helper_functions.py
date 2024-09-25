@@ -48,8 +48,6 @@ def read_data_from_file(filename = "data.txt"):
     
     return data
 
-import re
-from datetime import datetime
 
 def process_data(data):
     """

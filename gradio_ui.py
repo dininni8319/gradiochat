@@ -1,6 +1,5 @@
 import multiprocessing
 import gradio as gr
-import pandas as pd
 from openai_assistent import initialize_assistant, create_thread_and_send_query, create_thread_send_file_and_query, retrieve_and_format_messages
 from flask_app import run_flask
 from helper_functions import read_data_from_file, process_data
