@@ -68,7 +68,6 @@ def handle_assistant_query(query, history):
     except Exception as e:
         return history + [[None, f"An error occurred: {e}"]]
 
-
 # Global data variable
 data = None
 
