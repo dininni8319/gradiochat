@@ -14,7 +14,6 @@ client = OpenAI(api_key=api_key)
 def initialize_assistant():
     user_data = read_data_from_file()
     existing_assistant_id = get_value_from_file(user_data["assistant"])
-    print("🚀 ~ existing_assistant_id:", existing_assistant_id)
 
     if existing_assistant_id:
         # Retrieve existing assistant
@@ -27,8 +26,6 @@ def initialize_assistant():
             tools=[{"type": "file_search"}],
             model="gpt-4o-mini",
         )
-        # Save the new assistant ID for future use
-        # save_assistant_id(assistant_id_file, assistant.id)
         return assistant
 
 # Function to create a new thread and send the user's query and the file content
