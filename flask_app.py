@@ -31,6 +31,3 @@ def index():
     </html>
     """
     return render_template_string(template, gradio_app=gradio_app_html)
-
-if __name__ == "__main__":
-    app.run()
