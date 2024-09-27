@@ -123,13 +123,13 @@ def create_gradio_interface():
 
 # Function to run Gradio
 def run_gradio():
+    flask_process = multiprocessing.Process(target=run_flask)
+    flask_process.start()
     demo = create_gradio_interface()
     demo.launch(share=False, server_port=7862)
 
 if __name__ == "__main__":
     # Start Flask in a separate process
-    flask_process = multiprocessing.Process(target=run_flask)
-    flask_process.start()
 
     # Run Gradio for the chat interface
     run_gradio()
