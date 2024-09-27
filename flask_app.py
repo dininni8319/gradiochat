@@ -42,10 +42,10 @@ def run_gradio():
         inline=True, 
         prevent_thread_lock=True, 
         server_name="127.0.0.1",
-        show_error=False,
-        show_api=False
+        # show_error=False,
+        # show_api=False
     )  # Prevent thread lock
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run()

@@ -46,6 +46,7 @@ def handle_assistant_query(query, history):
         return history + [[None, "Mi dispiace ma hai raggiunto il numero massimo di richieste per questo periodo"]]
     
     try:
+        # Initialize the assistant
         assistant = initialize_assistant()
 
         # Create a thread and send the user's query
