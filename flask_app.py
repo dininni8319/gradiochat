@@ -42,7 +42,8 @@ def run_gradio():
         inline=True, 
         prevent_thread_lock=True, 
         server_name="127.0.0.1",
-        show_error=False
+        show_error=False,
+        show_api=False
     )  # Prevent thread lock
 
 
