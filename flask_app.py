@@ -10,15 +10,9 @@ demo = create_gradio_interface()
 # Serve Gradio interface on the root route
 @app.route("/", methods=["GET"])
 def run_gradio():
-    demo.launch(
-        share=False, 
-        inline=True, 
-        prevent_thread_lock=True, 
-        server_name="127.0.0.1",
-        # show_error=False,
-        # show_api=False
-    )  # Prevent thread lock
-    
+    demo.launch(share=False, inline=True, prevent_thread_lock=True, server_name="0.0.0.0")
+    return jsonify({'status': 'Success', 'message': 'Gradio app is running at /'})
+
 
 # Route to receive token
 @app.route('/token', methods=['POST'])
