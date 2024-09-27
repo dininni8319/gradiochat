@@ -1,6 +1,6 @@
-from flask import Flask, request, jsonify, render_template, url_for, redirect
+from flask import Flask, jsonify, render_template, request #url_for, redirect
 from flask_cors import CORS
-from db import is_token_valid
+# from db import is_token_valid
 from gradio_ui import create_gradio_interface
 
 app = Flask(__name__)
@@ -11,7 +11,7 @@ demo = create_gradio_interface()
 # Serve Gradio interface on the root route
 @app.route("/", methods=["GET"])
 def run_gradio():
-    return render_template("/templates/index.html")  # Render HTML template
+    return render_template("index.html")  # Render HTML template
     # Launch the Gradio interface
     # return demo.launch(
     #     share=False, 
