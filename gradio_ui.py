@@ -124,7 +124,7 @@ def create_gradio_interface():
 # Function to run Gradio
 def run_gradio():
     demo = create_gradio_interface()
-    demo.launch(share=False)
+    demo.launch(share=False, server_port=7862)
 
 if __name__ == "__main__":
     # Start Flask in a separate process
