@@ -4,7 +4,7 @@ from db import is_token_valid
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/token": {"origins": "*"}})
+CORS(app, resources={r"/token": {"origins": ["https://chat-w3innovation.pythonanywhere.com/", "w3Innovation.pythonanywhere.com"]}})
 
 # Route to receive token
 @app.route('/token', methods=['POST'])
