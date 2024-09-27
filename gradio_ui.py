@@ -1,7 +1,6 @@
 import multiprocessing
 import gradio as gr
 from openai_assistent import initialize_assistant, create_thread_and_send_query, create_thread_send_file_and_query, retrieve_and_format_messages
-from flask_app import run_flask
 from helper_functions import read_data_from_file, process_data
 from requests_made import check_and_update_requests, add_chat_conversation, get_chat_conversations
 
@@ -47,7 +46,6 @@ def handle_assistant_query(query, history):
         return history + [[None, "Mi dispiace ma hai raggiunto il numero massimo di richieste per questo periodo"]]
     
     try:
-        # Initialize the assistant
         assistant = initialize_assistant()
 
         # Create a thread and send the user's query
@@ -120,16 +118,3 @@ def create_gradio_interface():
         )
 
     return demo
-
-# Function to run Gradio
-def run_gradio():
-    flask_process = multiprocessing.Process(target=run_flask)
-    flask_process.start()
-    demo = create_gradio_interface()
-    demo.launch(share=False, server_port=7862)
-
-if __name__ == "__main__":
-    # Start Flask in a separate process
-
-    # Run Gradio for the chat interface
-    run_gradio()

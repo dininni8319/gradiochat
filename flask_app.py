@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify, redirect, url_for
 from flask_cors import CORS
 from db import is_token_valid
-
+from gradio_ui import create_gradio_interface
 
 app = Flask(__name__)
 CORS(app, resources={r"/token": {"origins": ["https://chat-w3innovation.pythonanywhere.com/", "w3Innovation.pythonanywhere.com"]}})
+
 
 # Route to receive token
 @app.route('/token', methods=['POST'])
@@ -25,6 +26,13 @@ def receive_token():
     
     return jsonify({'status': 'Success', 'message': 'Token received'})
 
-# Function to run Flask
-def run_flask():
-    app.run(host='0.0.0.0', port=5000, threaded=True)
+
+@app.route("/", methods=["GET", "POST"])
+def run_gradio():
+    demo = create_gradio_interface()
+    demo.launch(share=False, inline=True)
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
+
+
