@@ -1,11 +1,11 @@
 from flask import Flask, render_template_string
-from flask_cors import CORS
+# from flask_cors import CORS
 # from db import is_token_valid
 from gradio_ui import create_gradio_interface
 
 app = Flask(__name__)
 
-CORS(app)
+# CORS(app)
 
 
 @app.route("/")
