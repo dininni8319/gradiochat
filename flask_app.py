@@ -11,22 +11,22 @@ demo = create_gradio_interface()
 # Serve Gradio interface on the root route
 @app.route("/", methods=["GET"])
 def run_gradio():
-    gradio_html = demo.launch(share=False, inline=True, prevent_thread_lock=True, server_name="0.0.0.0")
+    gradio_html = demo.launch(share=False, inline=True, prevent_thread_lock=True)
     return render_template("index.html", gradio_html=gradio_html)
 
 # Route to receive token
 @app.route('/token', methods=['POST'])
 def receive_token():
     data = request.get_json()
-    if not data:
-        return jsonify({'status': 'Error', 'message': 'No JSON data received'}), 400  # Bad Request
+    # if not data:
+    #     return jsonify({'status': 'Error', 'message': 'No JSON data received'}), 400  # Bad Request
 
-    token = data.get('token')
-    user_id = data.get('user_id')
-    assistant = data.get('assistant')
+    # token = data.get('token')
+    # user_id = data.get('user_id')
+    # assistant = data.get('assistant')
 
-    if not token or not user_id or not assistant:
-        return jsonify({'status': 'Error', 'message': 'Missing token, user_id, or assistant'}), 400
+    # if not token or not user_id or not assistant:
+    #     return jsonify({'status': 'Error', 'message': 'Missing token, user_id, or assistant'}), 400
 
     # Write data to a plain text file (ensure file is secure)
     # with open("data.txt", 'w') as file:
@@ -34,8 +34,8 @@ def receive_token():
     #     file.write(f"token={token}\n")
     #     file.write(f"assistant={assistant}\n")
 
-    if not is_token_valid(user_id, token):
-        return redirect(url_for('login'))  # Use `url_for` for better URL management
+    # if not is_token_valid(user_id, token):
+    #     return redirect(url_for('login'))  # Use `url_for` for better URL management
 
     return jsonify({'status': 'Success', 'message': 'Token received'})
 
