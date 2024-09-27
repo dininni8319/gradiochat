@@ -8,19 +8,16 @@ CORS(app)
 
 demo = create_gradio_interface()
 
-# Serve Gradio interface on the root route
-@app.route("/", methods=["GET"])
-def run_gradio():
-    # return render_template("index.html")  # Render HTML template
-    # Launch the Gradio interface
-    demo.launch(
-        share=False, 
-        inline=True, 
-        # prevent_thread_lock=True, 
-        # server_name="0.0.0.0",  # Use 0.0.0.0 to accept connections from all interfaces
-        # show_error=False,
-        # show_api=False
-    )
+@app.route("/")
+def home():
+    # Render a simple HTML page that will contain the Gradio interface
+    return render_template("index.html")
+
+@app.route("/gradio")
+def gradio_app():
+    # Run the Gradio app inline and return the HTML
+    return demo.launch(inline=True)
+
 # Route to receive token
 @app.route('/token', methods=['POST'])
 def receive_token():
