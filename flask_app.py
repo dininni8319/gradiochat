@@ -1,18 +1,18 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from db import is_token_valid
 from gradio_ui import create_gradio_interface
 
 app = Flask(__name__)
-CORS(app, resources={r"/token": {"origins": ["https://chat-w3innovation.pythonanywhere.com", "https://w3Innovation.pythonanywhere.com"]}})
+CORS(app, resources={r"/": {"origins": ["https://chat-w3innovation.pythonanywhere.com", "https://w3Innovation.pythonanywhere.com"]}})
 
 demo = create_gradio_interface()
+
 # Serve Gradio interface on the root route
 @app.route("/", methods=["GET"])
 def run_gradio():
-    demo.launch(share=False, inline=True, prevent_thread_lock=True, server_name="0.0.0.0")
-    return jsonify({'status': 'Success', 'message': 'Gradio app is running at /'})
-
+    gradio_html = demo.launch(share=False, inline=True, prevent_thread_lock=True, server_name="0.0.0.0")
+    return render_template("index.html", gradio_html=gradio_html)
 
 # Route to receive token
 @app.route('/token', methods=['POST'])
