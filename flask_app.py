@@ -11,15 +11,16 @@ demo = create_gradio_interface()
 # Serve Gradio interface on the root route
 @app.route("/", methods=["GET"])
 def run_gradio():
+    return render_template("index.html")  # Render HTML template
     # Launch the Gradio interface
-    return demo.launch(
-        share=False, 
-        inline=True, 
-        # prevent_thread_lock=True, 
-        # server_name="0.0.0.0",  # Use 0.0.0.0 to accept connections from all interfaces
-        # show_error=False,
-        # show_api=False
-    )
+    # return demo.launch(
+    #     share=False, 
+    #     inline=True, 
+    #     # prevent_thread_lock=True, 
+    #     # server_name="0.0.0.0",  # Use 0.0.0.0 to accept connections from all interfaces
+    #     # show_error=False,
+    #     # show_api=False
+    # )
 # Route to receive token
 @app.route('/token', methods=['POST'])
 def receive_token():
