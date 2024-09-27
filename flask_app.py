@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, url_for, redirect
 from flask_cors import CORS
 from db import is_token_valid
 from gradio_ui import create_gradio_interface
@@ -29,10 +29,10 @@ def receive_token():
         return jsonify({'status': 'Error', 'message': 'Missing token, user_id, or assistant'}), 400
 
     # Write data to a plain text file (ensure file is secure)
-    with open("data.txt", 'w') as file:
-        file.write(f"user_id={user_id}\n")
-        file.write(f"token={token}\n")
-        file.write(f"assistant={assistant}\n")
+    # with open("data.txt", 'w') as file:
+    #     file.write(f"user_id={user_id}\n")
+    #     file.write(f"token={token}\n")
+    #     file.write(f"assistant={assistant}\n")
 
     if not is_token_valid(user_id, token):
         return redirect(url_for('login'))  # Use `url_for` for better URL management
