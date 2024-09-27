@@ -1,6 +1,7 @@
 import os
-import psycopg2
-from psycopg2 import sql
+import MySQLdb
+# import psycopg2
+# from psycopg2 import sql
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,17 +15,29 @@ port = os.getenv("DATABASE_PORT")
 # Function to create a new connection
 def get_connection():
     try:
-        connection = psycopg2.connect(
-            database=db,
-            user=username,
-            password=password,
-            host=host,
-            port=port
+        db = MySQLdb.connect(
+            host='your_db_host', 
+            user='your_db_user', 
+            password='your_db_password', 
+            db='your_db_name'
         )
-        print("Connection created successfully")
-        return connection
-    except Exception as e:
-        print(f"Error getting connection: {e}")
+        cursor = db.cursor()
+        print("Database connection successful!")
+    except MySQLdb.Error as e:
+        print(f"Error connecting to MySQL: {e}")
+#     try:
+#         connection = psycopg2.connect(
+#             database=db,
+#             user=username,
+#             password=password,
+#             host=host,
+#             port=port
+#         )
+#         print("Connection created successfully")
+#         return connection
+#     except Exception as e:
+#         print(f"Error getting connection: {e}")
+
 # Function to check if a token is valid for a specific user
 def is_token_valid(user_id, token):
     connection = None
