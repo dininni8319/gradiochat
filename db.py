@@ -1,46 +1,36 @@
 import os
 import MySQLdb
-# import psycopg2
-# from psycopg2 import sql
 from dotenv import load_dotenv
 
 load_dotenv()
 
-db = os.getenv("DATABASE_NAME")
+# Fetching database connection parameters from environment variables
+db_name = os.getenv("DATABASE_NAME")
 username = os.getenv("DATABASE_USER")
 password = os.getenv("DATABASE_PASSWORD")
 host = os.getenv("DATABASE_HOST")
-port = os.getenv("DATABASE_PORT")
+port = os.getenv("DATABASE_PORT")  # MySQL typically defaults to port 3306
 
 # Function to create a new connection
 def get_connection():
     try:
-        db = MySQLdb.connect(
-            host='your_db_host', 
-            user='your_db_user', 
-            password='your_db_password', 
-            db='your_db_name'
+        connection = MySQLdb.connect(
+            host=host, 
+            user=username, 
+            passwd=password, 
+            db=db_name,
+            port=int(port) if port else 3306  # Use the specified port or default to 3306
         )
-        cursor = db.cursor()
         print("Database connection successful!")
+        return connection
     except MySQLdb.Error as e:
         print(f"Error connecting to MySQL: {e}")
-#     try:
-#         connection = psycopg2.connect(
-#             database=db,
-#             user=username,
-#             password=password,
-#             host=host,
-#             port=port
-#         )
-#         print("Connection created successfully")
-#         return connection
-#     except Exception as e:
-#         print(f"Error getting connection: {e}")
+        return None
 
 # Function to check if a token is valid for a specific user
 def is_token_valid(user_id, token):
     connection = None
+    cursor = None
     try:
         connection = get_connection()
         if connection is None:
@@ -49,7 +39,7 @@ def is_token_valid(user_id, token):
         cursor = connection.cursor()
         
         # Define the query to check if the token exists for the specified user
-        query = sql.SQL("SELECT COUNT(*) FROM user_usertoken WHERE token = %s AND user_id = %s")
+        query = "SELECT COUNT(*) FROM user_usertoken WHERE token = %s AND user_id = %s"
         
         # Execute the query
         cursor.execute(query, (token, user_id))

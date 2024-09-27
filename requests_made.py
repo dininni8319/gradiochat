@@ -1,9 +1,8 @@
+import os
 from db import get_connection
-from psycopg2 import sql
-from decouple import config
 from datetime import datetime, timedelta
 from helper_functions import read_data_from_file
-import psycopg2
+import MySQLdb
 
 MAX_REQUESTS = 50  # Set max requests to 50
 
@@ -14,10 +13,10 @@ def add_chat_conversation(user_id, query, response):
         cursor = conn.cursor()
 
         # Insert the conversation into the database
-        cursor.execute(sql.SQL("""
+        cursor.execute("""
             INSERT INTO chatbot_chatconversation (user_id, query, response, created_at)
             VALUES (%s, %s, %s, %s);
-        """), (user_id, query, response, datetime.now()))
+        """, (user_id, query, response, datetime.now()))
 
         # Commit the transaction
         conn.commit()
@@ -26,7 +25,7 @@ def add_chat_conversation(user_id, query, response):
         conn.close()
         print("Chat added successfully.")
         
-    except psycopg2.DatabaseError as e:
+    except MySQLdb.DatabaseError as e:
         print(f"Database error: {e}")
         
     except Exception as e:
@@ -38,12 +37,12 @@ def get_chat_conversations(user_id):
     cursor = conn.cursor()
 
     # Select all conversations for the user
-    cursor.execute(sql.SQL("""
+    cursor.execute("""
         SELECT query, created_at, response
         FROM chatbot_chatconversation
         WHERE user_id = %s
         ORDER BY created_at DESC;
-    """), (user_id,))
+    """, (user_id,))
 
     conversations = cursor.fetchall()
 
@@ -68,19 +67,18 @@ def create_or_update_tracking(user_id):
     period_start, period_end = get_tracking_period(now)
 
     # Insert or update the tracking entry
-    cursor.execute(sql.SQL("""
+    cursor.execute("""
         INSERT INTO chatbot_requesttracking (user_id, period_start_date, period_end_date, requests_made, max_requests)
         VALUES (%s, %s, %s, %s, %s)
-        ON CONFLICT (user_id) DO UPDATE
-        SET period_start_date = EXCLUDED.period_start_date,
-            period_end_date = EXCLUDED.period_end_date,
-            requests_made = CASE
-                WHEN chatbot_requesttracking.period_end_date < %s THEN 0
-                ELSE chatbot_requesttracking.requests_made
-            END,
-            max_requests = %s
-        WHERE chatbot_requesttracking.user_id = %s;
-    """), (user_id, period_start, period_end, 0, MAX_REQUESTS, now, MAX_REQUESTS, user_id))
+        ON DUPLICATE KEY UPDATE
+        period_start_date = VALUES(period_start_date),
+        period_end_date = VALUES(period_end_date),
+        requests_made = CASE
+            WHEN chatbot_requesttracking.period_end_date < %s THEN 0
+            ELSE chatbot_requesttracking.requests_made
+        END,
+        max_requests = VALUES(max_requests);
+    """, (user_id, period_start, period_end, 0, MAX_REQUESTS, now, MAX_REQUESTS))
 
     conn.commit()
     cursor.close()
@@ -93,19 +91,19 @@ def check_and_update_requests(user_id):
 
     now = datetime.now().date()
 
-    cursor.execute(sql.SQL("""
+    cursor.execute("""
         SELECT requests_made, max_requests, period_end_date
         FROM chatbot_requesttracking
         WHERE user_id = %s;
-    """), (user_id,))
+    """, (user_id,))
     result = cursor.fetchone()
 
     if result is None:
         # If user doesn't exist, insert a new row with requests_made = 0
-        cursor.execute(sql.SQL("""
+        cursor.execute("""
             INSERT INTO chatbot_requesttracking (user_id, requests_made, max_requests, period_start_date, period_end_date)
             VALUES (%s, %s, %s, %s, %s);
-        """), (user_id, 0, MAX_REQUESTS, now, now + timedelta(days=30)))
+        """, (user_id, 0, MAX_REQUESTS, now, now + timedelta(days=30)))
         conn.commit()
 
     else:
@@ -113,13 +111,13 @@ def check_and_update_requests(user_id):
         if now > period_end_date:
             # Reset period
             period_start, period_end = get_tracking_period(now)
-            cursor.execute(sql.SQL("""
+            cursor.execute("""
                 UPDATE chatbot_requesttracking
                 SET period_start_date = %s,
                     period_end_date = %s,
                     requests_made = 0
                 WHERE user_id = %s;
-            """), (period_start, period_end, user_id))
+            """, (period_start, period_end, user_id))
             conn.commit()
             requests_made = 0  # Reset requests made for new period
         
@@ -128,11 +126,11 @@ def check_and_update_requests(user_id):
             return False
 
         # Update request count
-        cursor.execute(sql.SQL("""
+        cursor.execute("""
             UPDATE chatbot_requesttracking
             SET requests_made = requests_made + 1
             WHERE user_id = %s;
-        """), (user_id,))
+        """, (user_id,))
         conn.commit()
         print(f"Request recorded for user {user_id}. Total requests this period: {requests_made + 1}")
 
