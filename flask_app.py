@@ -37,7 +37,13 @@ def receive_token():
 @app.route("/", methods=["GET", "POST"])
 def run_gradio():
     demo = create_gradio_interface()
-    return demo.launch(share=False, inline=True, prevent_thread_lock=True)  # Prevent thread lock
+    return demo.launch(
+        share=False, 
+        inline=True, 
+        prevent_thread_lock=True, 
+        show_error=False, 
+        enable_queue=False
+    )  # Prevent thread lock
 
 
 if __name__ == "__main__":
