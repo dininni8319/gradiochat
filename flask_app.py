@@ -1,47 +1,36 @@
-from flask import Flask, jsonify, render_template, request #url_for, redirect
+from flask import Flask, render_template_string
 from flask_cors import CORS
 # from db import is_token_valid
 from gradio_ui import create_gradio_interface
 
 app = Flask(__name__)
+
 CORS(app)
 
-demo = create_gradio_interface()
 
 @app.route("/")
-def home():
-    # Render a simple HTML page that will contain the Gradio interface
-    return render_template("index.html")
-
-@app.route("/gradio")
-def gradio_app():
-    # Run the Gradio app inline and return the HTML
-    return demo.launch(inline=True)
-
-# Route to receive token
-@app.route('/token', methods=['POST'])
-def receive_token():
-    data = request.get_json()
-    # if not data:
-    #     return jsonify({'status': 'Error', 'message': 'No JSON data received'}), 400  # Bad Request
-
-    # token = data.get('token')
-    # user_id = data.get('user_id')
-    # assistant = data.get('assistant')
-
-    # if not token or not user_id or not assistant:
-    #     return jsonify({'status': 'Error', 'message': 'Missing token, user_id, or assistant'}), 400
-
-    # Write data to a plain text file (ensure file is secure)
-    # with open("data.txt", 'w') as file:
-    #     file.write(f"user_id={user_id}\n")
-    #     file.write(f"token={token}\n")
-    #     file.write(f"assistant={assistant}\n")
-
-    # if not is_token_valid(user_id, token):
-    #     return redirect(url_for('login'))  # Use `url_for` for better URL management
-
-    return jsonify({'status': 'Success', 'message': 'Token received'})
+def index():
+    # Create the Gradio app and pass it to the template
+    gradio_app_html = create_gradio_interface()
+    
+    # Flask will render this template with the Gradio Blocks app embedded
+    template = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gradio Blocks in Flask</title>
+    </head>
+    <body>
+        <h1>Gradio Blocks with Flask</h1>
+        <div>
+            {{ gradio_app|safe }}
+        </div>
+    </body>
+    </html>
+    """
+    return render_template_string(template, gradio_app=gradio_app_html)
 
 if __name__ == "__main__":
     app.run()

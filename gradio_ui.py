@@ -118,4 +118,4 @@ def create_gradio_interface():
             value=conversations
         )
 
-    return demo
+    return demo.launch(inline=True, prevent_thread_lock=True, share=False)
