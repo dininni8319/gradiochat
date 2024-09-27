@@ -11,7 +11,7 @@ demo = create_gradio_interface()
 # Serve Gradio interface on the root route
 @app.route("/", methods=["GET"])
 def run_gradio():
-    return render_template("index.html")  # Render HTML template
+    return render_template("/templates/index.html")  # Render HTML template
     # Launch the Gradio interface
     # return demo.launch(
     #     share=False, 
