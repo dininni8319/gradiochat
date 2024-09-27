@@ -41,7 +41,8 @@ def run_gradio():
         share=False, 
         inline=True, 
         prevent_thread_lock=True, 
-        server_name="127.0.0.1"
+        server_name="127.0.0.1",
+        show_error=False
     )  # Prevent thread lock
 
 
