@@ -13,7 +13,7 @@ demo = create_gradio_interface()
 def run_gradio():
     # return render_template("index.html")  # Render HTML template
     # Launch the Gradio interface
-    return demo.launch(
+    demo.launch(
         share=False, 
         inline=True, 
         # prevent_thread_lock=True, 
