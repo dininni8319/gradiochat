@@ -12,7 +12,7 @@ demo = create_gradio_interface()
 @app.route("/", methods=["GET"])
 def run_gradio():
     gradio_html = demo.launch(share=False, inline=True, prevent_thread_lock=True)
-    return render_template("index.html", gradio_html=gradio_html)
+    return render_template("/templates/index.html", gradio_html=gradio_html)
 
 # Route to receive token
 @app.route('/token', methods=['POST'])
